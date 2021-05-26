@@ -1,0 +1,35 @@
+.content {
+  max-width: 1120px;
+  margin: 5rem auto;
+}
+
+.newsList {
+  margin-top: 2rem;
+  border-top: 1px solid #29292e;
+  padding: 2rem;
+
+  span {
+    font-size: 1rem;
+  }
+
+  a {
+    margin-top: 1.5rem;
+    display: block;
+
+    font-weight: bold;
+    font-size: 2.3rem;
+    color: var(--cyan-500);
+
+    transition: filter 0.2s;
+
+    &:hover {
+      filter: brightness(0.9);
+      text-decoration: underline;
+    }
+  }
+
+  p {
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+  }
+}
