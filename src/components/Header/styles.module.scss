@@ -64,3 +64,19 @@
     }
   }
 }
+
+@media (max-width: 450px) {
+  .container {
+    height: 7rem;
+    margin-top: 1rem;
+  }
+  .content {
+    display: block;
+
+    nav {
+      display: flex;
+      justify-content: center;
+      margin: 0;
+    }
+  }
+}

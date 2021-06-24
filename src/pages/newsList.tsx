@@ -9,7 +9,7 @@ export default function newsList(props) {
       <Head>
         <title>Noticias | blognews</title>
       </Head>
-      <section className={styles.content}>
+      <section className={styles.content} id="topo">
         {newsArray.map((news) => {
           return (
             <div key={news.title} className={styles.newsList}>
