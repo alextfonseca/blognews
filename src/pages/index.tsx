@@ -17,7 +17,7 @@ export default function Home() {
             <span> em um só lugar.</span>
           </h1>
 
-          <Link href="/newsList">
+          <Link href="/news/all">
             <button>Notícias</button>
           </Link>
         </main>
