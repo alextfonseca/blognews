@@ -12,7 +12,7 @@ export const Header = () => {
         </Link>
         <nav>
           <a href="/">Início</a>
-          <a href="/newsList">Notícias</a>
+          <a href="/news/all">Notícias</a>
         </nav>
       </div>
     </header>
