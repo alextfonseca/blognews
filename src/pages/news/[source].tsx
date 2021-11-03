@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps } from "next";
 
 import { format, parseISO } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
+import ReactLoading from 'react-loading';
 
 import styles from "./newsList.module.scss";
 
@@ -34,6 +35,9 @@ interface Source {
 }
 
 export default function Source(props: SourcesProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const news = props.news.articles;
   const sources = props.sources;
 
@@ -50,8 +54,23 @@ export default function Source(props: SourcesProps) {
   }
 
   useEffect(() => {
+    let isMounted = true;
+
+    const handleStart = (url) => {
+      url !== router.pathname ? setLoading(true) : setLoading(false);
+    };
+
+    const handleComplete = () => {
+      setLoading(false);
+    }
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+
     const source = document.getElementById("source") as HTMLSelectElement;
     source.value = props.source;
+
+    return () => { isMounted = false };
   }, []);
 
   return (
@@ -59,53 +78,63 @@ export default function Source(props: SourcesProps) {
       <Head>
         <title>Noticias | blognews</title>
       </Head>
-      <div className={styles.filter}>
-        <label htmlFor="">Filtre por</label>
 
-        <select name="" id="source" onChange={changeSource}>
-          <option value="all">Todas</option>
-          {sources.map(source => {
-            return <option key={source.id} value={source.id}>{source.name}</option>;
-          })}
-        </select>
-        ou
-        <select name="" id="category" onChange={changeCategory} defaultValue="category">
-          <option value="category">
-            Categoria
-          </option>
-          <option value="business">Negócios</option>
-          <option value="entertainment">Entretenimento</option>
-          <option value="general">Geral</option>
-          <option value="health">Saúde</option>
-          <option value="science">Ciência</option>
-          <option value="sports">Esportes</option>
-          <option value="technology">Tecnologia</option>
-        </select>
-      </div>
-      <section className={styles.content} id="topo">
-        {news.length > 0 ? (
-          news.map(news => {
-            return (
-              <div key={news.title} className={styles.newsList}>
-                <div>
-                  <span>
-                    {format(parseISO(news.publishedAt), "d MMM yy", {
-                      locale: ptBR,
-                    })}
-                  </span>
-                  <span>{news.source.name}</span>
-                </div>
-                <Link href={news.url}>
-                  <a>{news.title}</a>
-                </Link>
-                <p>{news.description}</p>
-              </div>
-            );
-          })
-        ) : (
-          <p>Categoria inexistente</p>
-        )}
-      </section>
+      { loading ? (
+        <div className={styles.bodyLoading}>
+          <ReactLoading type={"spin"} color={"#fff"} />
+        </div>
+      )
+      : (
+        <>
+          <div className={styles.filter}>
+            <label htmlFor="">Filtre por</label>
+
+            <select name="" id="source" onChange={changeSource}>
+              <option value="all">Todas</option>
+              {sources.map(source => {
+                return <option key={source.id} value={source.id}>{source.name}</option>;
+              })}
+            </select>
+            ou
+            <select name="" id="category" onChange={changeCategory} defaultValue="category">
+              <option value="category">
+                Categoria
+              </option>
+              <option value="business">Negócios</option>
+              <option value="entertainment">Entretenimento</option>
+              <option value="general">Geral</option>
+              <option value="health">Saúde</option>
+              <option value="science">Ciência</option>
+              <option value="sports">Esportes</option>
+              <option value="technology">Tecnologia</option>
+            </select>
+          </div>
+          <section className={styles.content} id="topo">
+            {news.length > 0 ? (
+              news.map(news => {
+                return (
+                  <div key={news.title} className={styles.newsList}>
+                    <div>
+                      <span>
+                        {format(parseISO(news.publishedAt), "d MMM yy", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                      <span>{news.source.name}</span>
+                    </div>
+                    <Link href={news.url}>
+                      <a>{news.title}</a>
+                    </Link>
+                    <p>{news.description}</p>
+                  </div>
+                );
+              })
+            ) : (
+              <p>Categoria inexistente</p>
+            )}
+          </section>
+        </>
+      )}
     </>
   );
 }

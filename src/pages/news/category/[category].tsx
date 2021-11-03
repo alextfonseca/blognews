@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import { GetStaticPaths, GetStaticProps } from "next";
 
 import { parseISO } from "date-fns";
+import ReactLoading from 'react-loading';
 
 import styles from "../newsList.module.scss";
 
@@ -31,6 +32,9 @@ interface Source {
 }
 
 export default function Category(props: CategoryProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const newsArray = props.articles;
   const sources = props.sources;
 
@@ -47,8 +51,23 @@ export default function Category(props: CategoryProps) {
   }
 
   useEffect(() => {
+    let isMounted = true;
+
+    const handleStart = (url) => {
+      url !== router.pathname ? setLoading(true) : setLoading(false);
+    };
+
+    const handleComplete = () => {
+      setLoading(false);
+    }
+
+    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeComplete", handleComplete);
+
     const category = document.getElementById("category") as HTMLInputElement;
     category.value = props.category;
+
+    return () => { isMounted = false };
   }, []);
 
   return (
@@ -56,48 +75,58 @@ export default function Category(props: CategoryProps) {
       <Head>
         <title>Noticias | blognews</title>
       </Head>
-      <div className={styles.filter}>
-        <label htmlFor="">Filtre por</label>
 
-        <select name="" id="source" onChange={changeSource}>
-          <option value="all">Todas</option>
-          {sources.map(source => {
-            return <option key={source.id} value={source.id}>{source.name}</option>;
-          })}
-        </select>
-        ou
-        <form action="">
-          <select name="" id="category" onChange={changeCategory}>
-            <option value="category">Categoria</option>
-            <option value="business">Negócios</option>
-            <option value="entertainment">Entretenimento</option>
-            <option value="general">Geral</option>
-            <option value="health">Saúde</option>
-            <option value="science">Ciência</option>
-            <option value="sports">Esportes</option>
-            <option value="technology">Tecnologia</option>
-          </select>
-        </form>
-      </div>
-      <section className={styles.content} id="topo">
-        {newsArray.length > 0 ? (
-          newsArray.map(news => {
-            return (
-              <div key={news.title} className={styles.newsList}>
-                <span>
-                  {new Intl.DateTimeFormat("pt-br").format(parseISO(news.publishedAt))}
-                </span>
-                <Link href={news.url}>
-                  <a>{news.title}</a>
-                </Link>
-                <p>{news.description}</p>
-              </div>
-            );
-          })
-        ) : (
-          <p>Categoria inexistente</p>
-        )}
-      </section>
+      { loading ? (
+        <div className={styles.bodyLoading}>
+          <ReactLoading type={"spin"} color={"#fff"} />
+        </div>
+      )
+      : (
+        <>
+          <div className={styles.filter}>
+            <label htmlFor="">Filtre por</label>
+
+            <select name="" id="source" onChange={changeSource}>
+              <option value="all">Todas</option>
+              {sources.map(source => {
+                return <option key={source.id} value={source.id}>{source.name}</option>;
+              })}
+            </select>
+            ou
+            <form action="">
+              <select name="" id="category" onChange={changeCategory}>
+                <option value="category">Categoria</option>
+                <option value="business">Negócios</option>
+                <option value="entertainment">Entretenimento</option>
+                <option value="general">Geral</option>
+                <option value="health">Saúde</option>
+                <option value="science">Ciência</option>
+                <option value="sports">Esportes</option>
+                <option value="technology">Tecnologia</option>
+              </select>
+            </form>
+          </div>
+          <section className={styles.content} id="topo">
+            {newsArray.length > 0 ? (
+              newsArray.map(news => {
+                return (
+                  <div key={news.title} className={styles.newsList}>
+                    <span>
+                      {new Intl.DateTimeFormat("pt-br").format(parseISO(news.publishedAt))}
+                    </span>
+                    <Link href={news.url}>
+                      <a>{news.title}</a>
+                    </Link>
+                    <p>{news.description}</p>
+                  </div>
+                );
+              })
+            ) : (
+              <p>Categoria inexistente</p>
+            )}
+          </section>
+        </>
+      )}
     </>
   );
 }

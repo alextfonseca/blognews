@@ -12,7 +12,9 @@ export const Header = () => {
         </Link>
         <nav>
           <a href="/">Início</a>
-          <a href="/news/all">Notícias</a>
+          <Link href="/news/all">
+            Notícias
+          </Link>
         </nav>
       </div>
     </header>
